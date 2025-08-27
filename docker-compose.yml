@@ -1,8 +1,8 @@
 services:
   freeswitch:
     build:
-      context: ./freeswitch-build
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: freeswitch-build/Dockerfile
     platform: linux/arm64
     container_name: voip-freeswitch
     ports:
@@ -11,13 +11,21 @@ services:
       - "5080:5080/tcp"
       - "8021:8021/tcp"
       - "10000-10100:10000-10100/udp"
+    healthcheck:
+      test: ["CMD-SHELL", "fs_cli -x 'status' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     volumes:
-      - ./configs/freeswitch:/etc/freeswitch:ro
-      - ./logs:/var/log/freeswitch
-      - freeswitch_storage:/var/lib/freeswitch
+      - ./configs/freeswitch:/etc/freeswitch:rw
+      - ./logs:/var/log/freeswitch:rw
+      - freeswitch_storage:/var/lib/freeswitch:rw
+      - freeswitch_run:/var/run/freeswitch:rw
     environment:
       - FREESWITCH_LOG_LEVEL=INFO
-    restart: unless-stopped
+    restart: "no"
+    stdin_open: true
+    tty: true
     depends_on:
       - database
     networks:
@@ -63,3 +71,4 @@ networks:
 volumes:
   postgres_data:
   freeswitch_storage:
+  freeswitch_run:

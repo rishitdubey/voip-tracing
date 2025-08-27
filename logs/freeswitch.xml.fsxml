@@ -1,4 +1,3 @@
-<?xml version="1.0"?>
 <document type="freeswitch/xml">
   <!--
     FreeSWITCH Main Configuration File
@@ -6,7 +5,13 @@
   -->
   
   <!-- Load default variables -->
-  <X-PRE-PROCESS cmd="include" data="vars.xml"/>
+  
+  <!-- Additional variables for a complete setup -->
+  
+  
+  
+  
+  
   
   <section name="configuration" description="Various Configuration">
     
@@ -85,7 +90,7 @@
       </mappings>
       <settings>
         <param name="colorize" value="true"/>
-        <param name="loglevel" value="$${console_loglevel}"/>
+        <param name="loglevel" value="info"/>
       </settings>
     </configuration>
     
@@ -95,7 +100,7 @@
         <param name="nat-map" value="false"/>
         <param name="listen-ip" value="0.0.0.0"/>
         <param name="listen-port" value="8021"/>
-        <param name="password" value="$${event_socket_password}"/>
+        <param name="password" value="ClueCon"/>
         <param name="apply-inbound-acl" value="loopback.auto"/>
       </settings>
     </configuration>
@@ -111,17 +116,60 @@
       </directory>
     </configuration>
 
-    <!-- Sofia SIP Configuration - CRITICAL for SIP functionality -->
-    <configuration name="sofia.conf" description="SIP Endpoint Configuration">
-      <global_settings>
-        <param name="log-level" value="0"/>
-        <param name="auto-restart" value="false"/>
-        <param name="debug-presence" value="0"/>
-        <param name="capture-server" value="udp:homer.domain.com:9060"/>
-      </global_settings>
-      
+    <!-- Sofia SIP Configuration -->
+    <configuration name="sofia.conf" description="SIP Endpoint">
       <profiles>
-        <X-PRE-PROCESS cmd="include" data="sip_profiles/*.xml"/>
+<configuration name="sofia.conf" description="SIP Endpoint Configuration">
+  <profiles>
+    <profile name="internal">
+      <aliases>
+        <alias name="default"/>
+      </aliases>
+      <gateways>
+      </gateways>
+      <domains>
+        <domain name="all" alias="false" parse="true"/>
+      </domains>
+      <settings>
+        <param name="user-agent-string" value="FreeSWITCH-VoIP-Lab"/>
+        <param name="debug" value="9"/>
+        <param name="sip-trace" value="yes"/>
+        <param name="sip-capture" value="yes"/>
+        <param name="watchdog-enabled" value="no"/>
+        <param name="watchdog-step-timeout" value="30000"/>
+        <param name="watchdog-event-timeout" value="30000"/>
+        <param name="log-auth-failures" value="true"/>
+        <param name="forward-unsolicited-mwi-notify" value="false"/>
+        <param name="context" value="default"/>
+        <param name="rfc2833-pt" value="101"/>
+        <param name="sip-port" value="5060"/>
+        <param name="dialplan" value="XML"/>
+        <param name="dtmf-duration" value="2000"/>
+        <param name="inbound-codec-prefs" value="PCMU,PCMA,G722"/>
+        <param name="outbound-codec-prefs" value="PCMU,PCMA,G722"/>
+        <param name="rtp-timer-name" value="soft"/>
+        <param name="local-network-acl" value="localnet.auto"/>
+        <param name="manage-presence" value="true"/>
+        <param name="inbound-codec-negotiation" value="generous"/>
+        <param name="nonce-ttl" value="60"/>
+        <param name="auth-calls" value="true"/>
+        <param name="auth-all-packets" value="false"/>
+        <param name="ext-rtp-ip" value="auto"/>
+        <param name="ext-sip-ip" value="auto"/>
+        <param name="rtp-ip" value="0.0.0.0"/>
+        <param name="sip-ip" value="0.0.0.0"/>
+        <param name="hold-music" value="local_stream://moh"/>
+        <param name="apply-nat-acl" value="nat.auto"/>
+        <param name="rtp-port-min" value="10000"/>
+        <param name="rtp-port-max" value="10100"/>
+	<param name="force-register-domain" value="${domain}"/>
+	<param name="force-subscription-domain" value="${domain}"/>
+	<param name="force-register-db-domain" value="${domain}"/>
+        <param name="challenge-realm" value="auto_from"/>
+      </settings>
+    </profile>
+  </profiles>
+</configuration>
       </profiles>
     </configuration>
     
@@ -170,14 +218,13 @@
         <condition field="destination_number" expression="^9196$">
           <action application="answer"/>
           <action application="echo"/>
-        </conansweron>
         </condition>
       </extension>
       
       <extension name="hold_music">
         <condition field="destination_number" expression="^9664$">
           <action application="answer"/>
-          <action application="playback" data="$${hold_music}"/>
+          <action application="playback" data="local_stream://moh"/>
         </condition>
       </extension>
 
@@ -192,7 +239,7 @@
   
   <!-- Directory -->
   <section name="directory" description="User Directory">
-    <domain name="$${domain}">
+    <domain name="voip-lab.local">
       <params>
         <param name="dial-string" value="{^^:sip_invite_domain=${dialed_domain}:presence_id=${dialed_user}@${dialed_domain}}${sofia_contact(*/${dialed_user}@${dialed_domain})}"/>
         <param name="jsonrpc-allowed-methods" value="verto"/>
@@ -200,15 +247,40 @@
       
       <variables>
         <variable name="record_stereo" value="true"/>
-        <variable name="default_gateway" value="$${default_provider}"/>
-        <variable name="default_areacode" value="$${default_areacode}"/>
+        <variable name="default_gateway" value=""/>
+        <variable name="default_areacode" value="918"/>
         <variable name="transfer_fallback_extension" value="operator"/>
       </variables>
       
       <groups>
         <group name="default">
           <users>
-            <X-PRE-PROCESS cmd="include" data="directory/default/*.xml"/>
+  <user id="1000">
+    <params>
+      <param name="password" value="1234"/>
+      <param name="vm-password" value="1000"/>
+    </params>
+    <variables>
+      <variable name="toll_allow" value="domestic,international,local"/>
+      <variable name="accountcode" value="1000"/>
+      <variable name="user_context" value="default"/>
+      <variable name="effective_caller_id_name" value="Extension 1000"/>
+      <variable name="effective_caller_id_number" value="1000"/>
+    </variables>
+  </user>
+  <user id="1001">
+    <params>
+      <param name="password" value="1234"/>
+      <param name="vm-password" value="1001"/>
+    </params>
+    <variables>
+      <variable name="toll_allow" value="domestic,international,local"/>
+      <variable name="accountcode" value="1001"/>
+      <variable name="user_context" value="default"/>
+      <variable name="effective_caller_id_name" value="Extension 1001"/>
+      <variable name="effective_caller_id_number" value="1001"/>
+    </variables>
+  </user>
           </users>
         </group>
       </groups>

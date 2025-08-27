@@ -161,12 +161,15 @@ RUN make install
 # Install default configuration
 RUN make samples
 
-# Set proper ownership
+# Set proper ownership and permissions
 RUN chown -R freeswitch:freeswitch /usr/local/freeswitch \
     && chown -R freeswitch:freeswitch /etc/freeswitch \
     && chown -R freeswitch:freeswitch /var/lib/freeswitch \
     && chown -R freeswitch:freeswitch /var/log/freeswitch \
-    && chown -R freeswitch:freeswitch /var/run/freeswitch
+    && chown -R freeswitch:freeswitch /var/run/freeswitch \
+    && chmod -R 755 /var/run/freeswitch \
+    && chmod -R 755 /var/log/freeswitch \
+    && chmod -R 755 /var/lib/freeswitch
 
 # Create symlinks for easier access
 RUN ln -sf /usr/local/freeswitch/bin/freeswitch /usr/bin/freeswitch
@@ -202,5 +205,8 @@ USER freeswitch
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
     CMD /usr/bin/fs_cli -x "status" || exit 1
 
-# Start FreeSWITCH
-CMD ["/usr/bin/freeswitch", "-u", "freeswitch", "-g", "freeswitch", "-ncwait"]
+# Add entrypoint script
+COPY docker/entrypoint.sh /docker-entrypoint.sh
+
+# Set the entrypoint
+ENTRYPOINT ["/bin/bash", "/docker-entrypoint.sh"]
