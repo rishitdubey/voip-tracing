@@ -20,7 +20,11 @@
         <load module="mod_dptools"/>
         <load module="mod_expr"/>
         <load module="mod_hash"/>
-        <load module="mod_commands"/>
+	<load module="mod_commands"/>
+	<load module="mod_esf"/>
+	<load module="mod_opus"/>
+	<load module="mod_gsm"/>
+	<load module="mod_pgsql"/>
         
         <!-- Event Socket -->
         <load module="mod_event_socket"/>
@@ -52,6 +56,25 @@
         <!-- Say -->
         <load module="mod_say_en"/>
       </modules>
+    </configuration>
+
+    <!-- Logging Configuration -->
+    <configuration name="logfile.conf" description="File Logging">
+      <settings>
+        <param name="profilename" value="default"/>
+      </settings>
+      <profiles>
+        <profile name="default">
+          <settings>
+            <param name="logfile" value="/var/log/freeswitch/freeswitch.log"/>
+            <param name="rollover" value="104857600"/>
+            <param name="maximum-rotate" value="32"/>
+          </settings>
+          <mappings>
+            <map name="all" value="console,debug,info,notice,warning,err,crit,alert"/>
+          </mappings>
+        </profile>
+      </profiles>
     </configuration>
     
     <!-- Console Configuration -->

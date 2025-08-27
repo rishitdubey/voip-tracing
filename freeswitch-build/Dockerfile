@@ -1,3 +1,4 @@
+
 # ARM64 FreeSWITCH Dockerfile - Build from Source (No Token Required)
 FROM --platform=linux/arm64 debian:bookworm-slim
 
@@ -148,7 +149,11 @@ RUN ./configure \
     --disable-static
 
 # Build and install (single-threaded for better error reporting)
-RUN make -j1 V=1 2>&1 | tee build.log || (echo "=== Build failed, showing last 50 lines of output ===" && tail -50 build.log && exit 1)
+# Build with better error handling
+RUN make -j$(nproc) 2>&1 | tee build.log || \
+    (echo "=== Parallel build failed, retrying with single thread ===" && \
+     make clean && make -j1 V=1 2>&1 | tee build-single.log) || \
+    (echo "=== Build failed completely ===" && tail -100 build-single.log && exit 1)
 
 # Install FreeSWITCH
 RUN make install

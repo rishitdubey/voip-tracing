@@ -10,7 +10,7 @@ services:
       - "5060:5060/tcp"
       - "5080:5080/tcp"
       - "8021:8021/tcp"
-      - "10000-10020:10000-10020/udp"
+      - "10000-10100:10000-10100/udp"
     volumes:
       - ./configs/freeswitch:/etc/freeswitch:ro
       - ./logs:/var/log/freeswitch
@@ -59,9 +59,6 @@ services:
 networks:
   voip-network:
     driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16
 
 volumes:
   postgres_data:
