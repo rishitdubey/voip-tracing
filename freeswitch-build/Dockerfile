@@ -204,7 +204,6 @@ USER freeswitch
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
     CMD /usr/bin/fs_cli -x "status" || exit 1
-
 # Add entrypoint script
 COPY docker/entrypoint.sh /docker-entrypoint.sh
 
