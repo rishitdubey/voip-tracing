@@ -12,12 +12,12 @@ services:
       - "8021:8021/tcp"
       - "10000-10100:10000-10100/udp"
     healthcheck:
-      test: ["CMD-SHELL", "fs_cli -x 'status' || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
+      test: ["CMD-SHELL", "ps aux | grep freeswitch | grep -v grep && netstat -tlnp | grep :5060 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
     volumes:
-      - ./configs/freeswitch:/etc/freeswitch:rw
+      - ./configs:/etc/freeswitch:rw
       - ./logs:/var/log/freeswitch:rw
       - freeswitch_storage:/var/lib/freeswitch:rw
       - freeswitch_run:/var/run/freeswitch:rw

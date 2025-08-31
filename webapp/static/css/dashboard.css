@@ -1,0 +1,205 @@
+/* VoIP Tracing MVP Dashboard Styles */
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #1a1a1a !important;
+}
+
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.card-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px 12px 0 0 !important;
+}
+
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.nav-tabs .nav-link {
+    background-color: #2d2d2d;
+    border-color: #404040;
+    color: #fff;
+    margin-right: 5px;
+    border-radius: 8px 8px 0 0;
+}
+
+.nav-tabs .nav-link.active {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: #fff;
+}
+
+.nav-tabs .nav-link:hover {
+    background-color: #4a4a4a;
+    border-color: #4a4a4a;
+}
+
+.table-dark {
+    --bs-table-bg: #2d2d2d;
+}
+
+.table-dark td, .table-dark th {
+    border-color: #404040;
+}
+
+.btn-success-custom {
+    background-color: #28a745;
+    border-color: #28a745;
+    color: white;
+}
+
+.btn-warning-custom {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #212529;
+}
+
+.btn-danger-custom {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: white;
+}
+
+.status-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.security-event {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-left: 4px solid;
+    border-radius: 4px;
+}
+
+.security-event.high {
+    border-color: #dc3545;
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
+.security-event.medium {
+    border-color: #ffc107;
+    background-color: rgba(255, 193, 7, 0.1);
+}
+
+.security-event.low {
+    border-color: #28a745;
+    background-color: rgba(40, 167, 69, 0.1);
+}
+
+.correlation-item {
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.confidence-bar {
+    height: 4px;
+    border-radius: 2px;
+    background-color: #404040;
+    overflow: hidden;
+}
+
+.confidence-fill {
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.confidence-high {
+    background-color: #28a745;
+}
+
+.confidence-medium {
+    background-color: #ffc107;
+}
+
+.confidence-low {
+    background-color: #dc3545;
+}
+
+#network-graph {
+    border: 1px solid #404040;
+    border-radius: 8px;
+    background-color: #2d2d2d;
+}
+
+.node-circle {
+    stroke: #fff;
+    stroke-width: 2px;
+    cursor: pointer;
+}
+
+.node-circle:hover {
+    stroke-width: 3px;
+}
+
+.link {
+    stroke: #999;
+    stroke-opacity: 0.6;
+    stroke-width: 2px;
+}
+
+.link:hover {
+    stroke-opacity: 1;
+    stroke-width: 3px;
+}
+
+.node-label {
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    fill: #fff;
+    text-anchor: middle;
+    pointer-events: none;
+}
+
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .col-md-2 {
+        margin-bottom: 1rem;
+    }
+    
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+}
+
+/* Animation for loading states */
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.loading {
+    animation: pulse 1.5s infinite;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #2d2d2d;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #6c757d;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #8d9299;
+}

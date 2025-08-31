@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<configuration name="sofia.conf" description="sofia Endpoint">
+  <global_settings>
+    <param name="log-level" value="9"/>
+    <param name="debug-presence" value="1"/>
+    <param name="debug-sla" value="1"/>
+    <param name="capture-server" value="udp:127.0.0.1:9060"/>
+  </global_settings>
+
+  <profiles>
+    <X-PRE-PROCESS cmd="include" data="/etc/freeswitch/sip_profiles/*.xml"/>
+  </profiles>
+</configuration>

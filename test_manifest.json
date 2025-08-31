@@ -1,0 +1,25 @@
+{
+  "generated_at": "2025-08-30T10:34:37.632716",
+  "test_scenarios": [
+    {
+      "scenario": "basic_sip_options",
+      "file": "../pcaps/basic_sip_options_20250830_103322.pcap",
+      "description": "Basic SIP OPTIONS requests"
+    },
+    {
+      "scenario": "registration_attempt",
+      "file": "../pcaps/registration_attempt_20250830_103342.pcap",
+      "description": "SIP registration and call attempt"
+    },
+    {
+      "scenario": "freeswitch_internal",
+      "file": "../pcaps/freeswitch_internal_20250830_103404.pcap",
+      "description": "Internal FreeSWITCH call generation"
+    }
+  ],
+  "next_steps": [
+    "Parse PCAP files with: python3 ../parser/voip_parser.py <pcap_file>",
+    "Run correlation analysis with: python3 ../parser/correlation_engine.py",
+    "Generate reports with: python3 ../parser/correlation_engine.py --report"
+  ]
+}

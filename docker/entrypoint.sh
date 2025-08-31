@@ -1,16 +1,33 @@
 #!/bin/bash
+set -e
 
-# Check if directories exist
-echo "Checking directory structure..."
-ls -la /etc/freeswitch
-ls -la /var/log/freeswitch
-ls -la /var/run/freeswitch
-ls -la /var/lib/freeswitch
+# Create necessary directories with root privileges
+mkdir -p /etc/freeswitch/conf/autoload_configs \
+         /var/run/freeswitch \
+         /var/log/freeswitch \
+         /var/lib/freeswitch/db \
+         /var/lib/freeswitch/storage \
+         /var/lib/freeswitch/recordings \
+         /var/lib/freeswitch/images \
+         /etc/freeswitch/conf/sip_profiles \
+         /etc/freeswitch/conf/directory/default
 
-# Check FreeSWITCH version
-echo "FreeSWITCH version:"
-freeswitch -version
+# Copy configuration files if they don't exist
+if [ ! -f /etc/freeswitch/conf/freeswitch.xml ]; then
+    cp -r /usr/local/freeswitch/conf/* /etc/freeswitch/conf/
+fi
 
-# Start FreeSWITCH in console mode
-echo "Starting FreeSWITCH..."
-exec /usr/bin/freeswitch -c
+# Create necessary database files if they don't exist
+touch /var/lib/freeswitch/db/core.db \
+      /var/lib/freeswitch/db/call_limit.db \
+      /var/lib/freeswitch/db/cdr.db
+
+# Fix permissions
+chown -R freeswitch:freeswitch /etc/freeswitch \
+      /var/run/freeswitch \
+      /var/log/freeswitch \
+      /var/lib/freeswitch
+chmod -R 755 /var/lib/freeswitch
+
+# Start FreeSWITCH in foreground mode
+exec /usr/local/freeswitch/bin/freeswitch -u freeswitch -g freeswitch -c

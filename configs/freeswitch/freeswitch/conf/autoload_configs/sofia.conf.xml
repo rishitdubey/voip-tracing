@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration name="sofia.conf" description="Sofia SIP UA">
+  <global_settings>
+    <param name="log-level" value="0"/>
+    <param name="tracelevel" value="DEBUG"/>
+  </global_settings>
+  <profiles>
+    <profile name="internal">
+      <settings>
+        <param name="debug" value="0"/>
+        <param name="sip-trace" value="yes"/>
+        <param name="auth-calls" value="false"/>
+        <param name="context" value="default"/>
+        <param name="rtp-timer-name" value="soft"/>
+        <param name="local-network-acl" value="localnet.auto"/>
+        <param name="manage-presence" value="true"/>
+        <param name="inbound-codec-prefs" value="PCMU,PCMA"/>
+        <param name="outbound-codec-prefs" value="PCMU,PCMA"/>
+        <param name="sip-port" value="5060"/>
+      </settings>
+    </profile>
+  </profiles>
+</configuration>

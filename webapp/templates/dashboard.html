@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoIP Tracing MVP - Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
+</head>
+<body class="bg-dark text-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-phone-alt me-2"></i>
+                VoIP Tracing MVP
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="nav-link" id="last-updated">Last Updated: <span id="update-time">--</span></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid py-4">
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-2">
+                <div class="card bg-secondary">
+                    <div class="card-body text-center">
+                        <i class="fas fa-list-alt fa-2x mb-2 text-primary"></i>
+                        <h3 id="total-traces" class="mb-1">0</h3>
+                        <p class="text-muted mb-0">Total Traces</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card bg-secondary">
+                    <div class="card-body text-center">
+                        <i class="fas fa-phone fa-2x mb-2 text-success"></i>
+                        <h3 id="total-sessions" class="mb-1">0</h3>
+                        <p class="text-muted mb-0">SIP Sessions</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card bg-secondary">
+                    <div class="card-body text-center">
+                        <i class="fas fa-stream fa-2x mb-2 text-info"></i>
+                        <h3 id="total-flows" class="mb-1">0</h3>
+                        <p class="text-muted mb-0">RTP Flows</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card bg-secondary">
+                    <div class="card-body text-center">
+                        <i class="fas fa-link fa-2x mb-2 text-warning"></i>
+                        <h3 id="total-correlations" class="mb-1">0</h3>
+                        <p class="text-muted mb-0">Correlations</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card bg-secondary">
+                    <div class="card-body text-center">
+                        <i class="fas fa-shield-alt fa-2x mb-2 text-danger"></i>
+                        <h3 id="total-security-events" class="mb-1">0</h3>
+                        <p class="text-muted mb-0">Security Events</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card bg-secondary">
+                    <div class="card-body text-center">
+                        <button class="btn btn-primary btn-sm" onclick="refreshDashboard()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                        <p class="text-muted mb-0 mt-2">Update Data</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Tabs -->
+        <ul class="nav nav-tabs mb-4" id="mainTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="traces-tab" data-bs-toggle="tab" data-bs-target="#traces" type="button" role="tab">
+                    <i class="fas fa-list me-1"></i> Traces
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="analysis-tab" data-bs-toggle="tab" data-bs-target="#analysis" type="button" role="tab">
+                    <i class="fas fa-chart-line me-1"></i> Analysis
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="security-tab" data-bs-toggle="tab" data-bs-target="#security" type="button" role="tab">
+                    <i class="fas fa-shield-alt me-1"></i> Security
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="network-tab" data-bs-toggle="tab" data-bs-target="#network" type="button" role="tab">
+                    <i class="fas fa-project-diagram me-1"></i> Network View
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="mainTabContent">
+            <!-- Traces Tab -->
+            <div class="tab-pane fade show active" id="traces" role="tabpanel">
+                <div class="card bg-secondary">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-list me-2"></i>VoIP Traces</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-dark table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Trace ID</th>
+                                        <th>SIP Sessions</th>
+                                        <th>RTP Flows</th>
+                                        <th>First Seen</th>
+                                        <th>Duration</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="traces-table">
+                                    <tr>
+                                        <td colspan="6" class="text-center">Loading...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analysis Tab -->
+            <div class="tab-pane fade" id="analysis" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card bg-secondary mb-3">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fas fa-phone me-2"></i>Call Flow Details</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="call-flow-details">
+                                    <p class="text-muted">Select a trace to view call flow analysis</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-secondary">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fas fa-link me-2"></i>Correlation Status</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="correlation-status">
+                                    <p class="text-muted">No trace selected</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Tab -->
+            <div class="tab-pane fade" id="security" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card bg-secondary">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i>Security Analysis</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="security-analysis">
+                                    <p class="text-muted">Select a trace to view security analysis</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Network View Tab -->
+            <div class="tab-pane fade" id="network" role="tabpanel">
+                <div class="card bg-secondary">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-project-diagram me-2"></i>Network Topology</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="network-graph" style="height: 600px;">
+                            <p class="text-muted">Select a trace to view network topology</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Trace Details Modal -->
+    <div class="modal fade" id="traceDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content bg-dark">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="traceDetailsModalLabel">Trace Details</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="trace-details-content">
+                        Loading...
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="runCorrelation()">Run Correlation</button>
+                    <button type="button" class="btn btn-warning" onclick="runSecurityAnalysis()">Security Analysis</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Modal -->
+    <div class="modal fade" id="loadingModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content bg-dark">
+                <div class="modal-body text-center">
+                    <div class="spinner-border text-primary mb-3" role="status"></div>
+                    <h5 id="loading-message">Processing...</h5>
+                    <p class="text-muted">This may take a few moments</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>
