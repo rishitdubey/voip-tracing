@@ -1,7 +1,7 @@
 {
-  "analysis_id": "analysis_20250828_214134",
-  "trace_id": null,
-  "timestamp": "2025-08-28T21:41:34.610373",
+  "analysis_id": "analysis_20250831_153215",
+  "trace_id": "real_call_test",
+  "timestamp": "2025-08-31T15:32:15.060030",
   "security_events": [],
   "risk_score": 0.0,
   "summary": {

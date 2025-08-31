@@ -1,3 +1,59 @@
+# Current
 .DS_Store
 .env
 /logs
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+voip_metadata.db
+parser/voip_metadata.db
+
+# PCAP files (large and sensitive)
+*.pcap
+*.pcapng
+pcaps/*.pcap
+pcaps/*.pcapng
+
+# Generated data
+structured_data/
+captures/
+security_report.json
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker volumes
+postgres_data/
+freeswitch_storage/
+freeswitch_run/
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/
+temp/
+*.tmp

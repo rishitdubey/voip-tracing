@@ -1,9 +1,0 @@
-{
-  "generated_at": "2025-08-31T12:52:51.120748",
-  "test_scenarios": [],
-  "next_steps": [
-    "Parse PCAP files with: python3 ../parser/voip_parser.py <pcap_file>",
-    "Run correlation analysis with: python3 ../parser/correlation_engine.py",
-    "Generate reports with: python3 ../parser/correlation_engine.py --report"
-  ]
-}
