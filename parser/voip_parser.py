@@ -159,14 +159,17 @@ class VoIPParser:
                 
                 try:
                     timestamp = pkt.sniff_time.isoformat()
+                    print(f"🔍 Processing packet {packet_count}: {pkt.highest_layer}")
                     
                     # Parse SIP packets
                     if hasattr(pkt, 'sip'):
+                        print(f"📞 Found SIP packet {sip_count + 1}")
                         self.parse_sip_packet(pkt, timestamp, trace_id)
                         sip_count += 1
                     
                     # Parse RTP packets
                     elif hasattr(pkt, 'rtp'):
+                        print(f"🎵 Found RTP packet {rtp_count + 1}")
                         self.parse_rtp_packet(pkt, timestamp, trace_id)
                         rtp_count += 1
                         
@@ -192,48 +195,133 @@ class VoIPParser:
         
     def parse_sip_packet(self, pkt, timestamp: str, trace_id: str):
         """Extract SIP message information"""
+        print(f"🔍 Starting to parse SIP packet...")
         try:
             sip = pkt.sip
+            print(f"✅ Got SIP layer: {type(sip)}")
             
             # Get basic packet info
+            print(f"🔍 Getting IP addresses...")
             src_ip = pkt.ip.src
             dst_ip = pkt.ip.dst
+            print(f"✅ IP addresses: {src_ip} -> {dst_ip}")
             
             # Handle different transport layers
+            print(f"🔍 Getting transport layer info...")
             if hasattr(pkt, 'udp'):
                 src_port = int(pkt.udp.srcport)
                 dst_port = int(pkt.udp.dstport)
+                print(f"✅ UDP ports: {src_port} -> {dst_port}")
             elif hasattr(pkt, 'tcp'):
                 src_port = int(pkt.tcp.srcport)
-                dst_port = int(pkt.tcp.dstport)
+                dst_port = int(pkt.tcp.tcp.dstport)
+                print(f"✅ TCP ports: {src_port} -> {dst_port}")
             else:
                 src_port = dst_port = 0
+                print(f"⚠️ No transport layer found")
             
             # Extract SIP headers (handle different pyshark versions)
+            print(f"🔍 Starting Call-ID extraction...")
+            print(f"🔍 Available field names: {sip.field_names}")
             call_id = None
-            for attr in ['Call-ID', 'call_id', 'Call_ID']:
-                if hasattr(sip, attr):
-                    call_id = getattr(sip, attr)
-                    break
-                    
-            method = getattr(sip, 'Method', getattr(sip, 'method', None))
-            response_code = None
             
-            # Try to get response code
-            if hasattr(sip, 'Status-Code'):
-                try:
-                    response_code = int(getattr(sip, 'Status-Code'))
-                except:
-                    pass
-            elif hasattr(sip, 'response_code'):
-                try:
-                    response_code = int(getattr(sip, 'response_code'))
-                except:
-                    pass
+            # For JsonLayer, try to get Call-ID from nested structure
+            try:
+                print(f"🔍 Trying to access msg_hdr field...")
+                if hasattr(sip, 'msg_hdr'):
+                    msg_hdr = sip.msg_hdr
+                    print(f"✅ Got msg_hdr: {type(msg_hdr)}")
                     
-            from_uri = getattr(sip, 'From', getattr(sip, 'from', None))
-            to_uri = getattr(sip, 'To', getattr(sip, 'to', None))
-            user_agent = getattr(sip, 'User-Agent', getattr(sip, 'user_agent', None))
+                    # Try to get Call-ID from msg_hdr using all_fields
+                    print(f"🔍 Checking all_fields in msg_hdr...")
+                    if hasattr(msg_hdr, 'all_fields'):
+                        all_fields = msg_hdr.all_fields
+                        print(f"✅ all_fields: {all_fields}")
+                        
+                        # Look for Call-ID in all_fields text content
+                        print(f"🔍 Processing {len(all_fields)} fields...")
+                        for i, field in enumerate(all_fields):
+                            print(f"🔍 Processing field {i}: {type(field)}")
+                            print(f"🔍 Field {i} attributes: {dir(field)}")
+                            
+                            # Try different ways to access the field content
+                            field_text = str(field)
+                            print(f"🔍 Field {i} string representation: {field_text[:100]}...")
+                            
+                            # Look for Call-ID in the text content
+                            if 'Call-ID:' in field_text:
+                                print(f"✅ Found 'Call-ID:' in field {i}")
+                                # Extract Call-ID using regex or string parsing
+                                import re
+                                call_id_match = re.search(r'Call-ID:\s*([^\r\n]+)', field_text)
+                                if call_id_match:
+                                    call_id = call_id_match.group(1).strip()
+                                    print(f"✅ Found Call-ID in field text: {call_id}")
+                                    break
+                                else:
+                                    print(f"❌ Regex didn't match Call-ID in: {field_text}")
+                            else:
+                                print(f"❌ No Call-ID found in field {i}")
+                        
+                        print(f"🔍 After loop, call_id = {call_id}")
+                    else:
+                        print(f"❌ No all_fields method in msg_hdr")
+                        
+                    # Also try direct access to common field names
+                    if not call_id:
+                        for field_name in ['Call-ID', 'call_id', 'call_id_generated']:
+                            try:
+                                if hasattr(msg_hdr, field_name):
+                                    call_id = getattr(msg_hdr, field_name)
+                                    print(f"✅ Found Call-ID using {field_name}: {call_id}")
+                                    break
+                            except:
+                                continue
+                else:
+                    print(f"❌ No msg_hdr field found")
+            except Exception as e:
+                print(f"❌ Exception accessing msg_hdr: {e}")
+            
+            # Fallback: try direct attribute access
+            if not call_id:
+                print(f"🔍 Trying direct attribute access...")
+                for attr in ['call_id', 'Call-ID', 'Call_ID']:
+                    if hasattr(sip, attr):
+                        call_id = getattr(sip, attr)
+                        print(f"✅ Found Call-ID using attribute '{attr}': {call_id}")
+                        break
+                    else:
+                        print(f"❌ Attribute '{attr}' not found")
+                    
+            # Extract method
+            try:
+                method = sip.get_field('Method') or getattr(sip, 'method', getattr(sip, 'Method', None))
+                print(f"🔍 Extracted method: {method}")
+            except Exception as e:
+                print(f"❌ Error extracting method: {e}")
+                method = None
+            
+            # Extract response code
+            response_code = None
+            try:
+                status_code = sip.get_field('Status-Code') or sip.get_field('status_code')
+                if status_code:
+                    response_code = int(status_code)
+                print(f"🔍 Extracted response_code: {response_code}")
+            except Exception as e:
+                print(f"❌ Error extracting response_code: {e}")
+                    
+            # Extract URIs and User-Agent
+            try:
+                from_uri = sip.get_field('From') or getattr(sip, 'from', getattr(sip, 'From', None))
+                to_uri = sip.get_field('To') or getattr(sip, 'to', getattr(sip, 'To', None))
+                user_agent = sip.get_field('User-Agent') or getattr(sip, 'user_agent', getattr(sip, 'User-Agent', None))
+                print(f"🔍 Extracted from_uri: {from_uri}")
+                print(f"🔍 Extracted to_uri: {to_uri}")
+                print(f"🔍 Extracted user_agent: {user_agent}")
+            except Exception as e:
+                print(f"❌ Error extracting URIs: {e}")
+                from_uri = to_uri = user_agent = None
             
             # Extract SDP if present
             sdp_content = None
@@ -244,13 +332,27 @@ class VoIPParser:
                     pass
                     
             if call_id:
+                print(f"✅ Found Call-ID: {call_id}, Method: {method}")
+                print(f"🔍 Current sessions count: {len(self.sip_sessions)}")
+                
                 if call_id not in self.sip_sessions:
                     self.sip_sessions[call_id] = SIPSession(call_id)
+                    print(f"✅ Created new SIP session for Call-ID: {call_id}")
+                    print(f"🔍 Sessions after creation: {len(self.sip_sessions)}")
+                else:
+                    print(f"✅ Using existing session for Call-ID: {call_id}")
                 
-                self.sip_sessions[call_id].add_message(
-                    timestamp, method, response_code, from_uri, to_uri,
-                    user_agent, sdp_content, src_ip, src_port, dst_ip, dst_port
-                )
+                try:
+                    self.sip_sessions[call_id].add_message(
+                        timestamp, method, response_code, from_uri, to_uri,
+                        user_agent, sdp_content, src_ip, src_port, dst_ip, dst_port
+                    )
+                    print(f"✅ Added message to session {call_id}")
+                except Exception as e:
+                    print(f"❌ Error adding message to session: {e}")
+            else:
+                print(f"❌ No Call-ID found in SIP packet")
+                print(f"🔍 Available fields: {[f for f in dir(sip) if 'call' in f.lower() or 'id' in f.lower()]}")
                 
         except Exception as e:
             logger.debug(f"Error parsing SIP packet: {e}")
